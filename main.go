@@ -10,6 +10,7 @@ import (
 	"github.com/LINSITrack/backend/src/routes"
 	"github.com/LINSITrack/backend/src/seed"
 	"github.com/LINSITrack/backend/src/services"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
@@ -38,6 +39,14 @@ func main() {
 	// Setup de router
 	router := gin.Default()
 
+	// Configuración CORS
+	router.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://localhost:3000", "http://localhost:8080"},
+		AllowMethods:     []string{"GET", "POST", "PATCH", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
+		AllowCredentials: true,
+	}))
+
 	// Logs
 	const Reset, Cyan = "\033[0m", "\033[36m"
 	log.SetPrefix(Cyan)
@@ -57,13 +66,14 @@ func main() {
 	})
 
 	// (¡Peligro: borra datos al descomentar!)
-	db.Migrator().DropTable(&models.Profesor{})
+	db.Migrator().DropTable(&models.Profesor{}, &models.Admin{}, &models.Alumno{}, &models.Materia{})
 
 	// Automigraciones
 	if err := db.AutoMigrate(
 		&models.Profesor{},
 		&models.Admin{},
 		&models.Alumno{},
+		&models.Materia{},
 	); err != nil {
 		log.Fatalf("Error during auto migration: %v\n", err)
 	}
@@ -72,19 +82,22 @@ func main() {
 	seed.AdminSeed(db)
 	seed.ProfesorSeed(db)
 	seed.AlumnoSeed(db)
+	seed.MateriaSeed(db)
 
 	// Setup de services
 	authService := services.NewAuthService(db)
 	profesorService := services.NewProfesorService(db)
 	adminService := services.NewAdminService(db)
 	alumnoService := services.NewAlumnoService(db)
+	materiaService := services.NewMateriaService(db)
 
 	// Setup de rutas
 	routes.SetupAuthRoutes(router, authService)
 	routes.SetupProfesoresRoutes(router, profesorService)
 	routes.SetupAdminsRoutes(router, adminService)
 	routes.SetupAlumnosRoutes(router, alumnoService)
-	
+	routes.SetupMateriasRoutes(router, materiaService)
+
 	// Run
 	router.Run()
 

@@ -34,7 +34,7 @@ func (c *AuthController) Login(ctx *gin.Context) {
 }
 
 func (c *AuthController) WhoAmI(ctx *gin.Context) {
-	// Obtener los datos del contexto (establecidos por AuthMiddleware)
+	// Obtener los datos del contexto
 	userID, _ := ctx.Get("userID")
 	userEmail, _ := ctx.Get("userEmail")
 	userRole, _ := ctx.Get("userRole")
@@ -54,20 +54,20 @@ func (c *AuthController) WhoAmI(ctx *gin.Context) {
 }
 
 func (c *AuthController) Logout(ctx *gin.Context) {
-	ctx.SetSameSite(http.SameSiteNoneMode)
-	ctx.SetCookie("jwt", "", -1, "/", "localhost", true, true)
+	ctx.SetSameSite(http.SameSiteLaxMode)
+	ctx.SetCookie("jwt", "", -1, "/", "localhost", false, true)
 	ctx.JSON(http.StatusOK, gin.H{"message": "Logout successful"})
 }
 
 func (c *AuthController) setCookie(ctx *gin.Context, token string) {
-	ctx.SetSameSite(http.SameSiteNoneMode)
+	ctx.SetSameSite(http.SameSiteLaxMode)
 	ctx.SetCookie(
 		"jwt",
 		token,
 		3600*24,
 		"/",
 		"localhost",
-		true,
+		false,
 		true,
 	)
 	ctx.JSON(http.StatusOK, gin.H{"message": "Login successful"})
