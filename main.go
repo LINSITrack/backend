@@ -65,8 +65,8 @@ func main() {
 		c.String(200, "Hello from Gin! Server is up and running. (Protected Route)")
 	})
 
-	// (¡Peligro: borra datos al descomentar!)
-	db.Migrator().DropTable(&models.Profesor{}, &models.Admin{}, &models.Alumno{}, &models.Materia{})
+	// (¡Peligro: Borra la base de datos al descomentar! Excepto los que se crean con la seed al iniciar el servidor)
+	db.Migrator().DropTable(&models.Profesor{}, &models.Admin{}, &models.Alumno{}, &models.Materia{}, &models.Comision{})
 
 	// Automigraciones
 	if err := db.AutoMigrate(
@@ -74,6 +74,7 @@ func main() {
 		&models.Admin{},
 		&models.Alumno{},
 		&models.Materia{},
+		&models.Comision{},
 	); err != nil {
 		log.Fatalf("Error during auto migration: %v\n", err)
 	}
@@ -83,6 +84,7 @@ func main() {
 	seed.ProfesorSeed(db)
 	seed.AlumnoSeed(db)
 	seed.MateriaSeed(db)
+	seed.ComisionSeed(db)
 
 	// Setup de services
 	authService := services.NewAuthService(db)
@@ -90,6 +92,7 @@ func main() {
 	adminService := services.NewAdminService(db)
 	alumnoService := services.NewAlumnoService(db)
 	materiaService := services.NewMateriaService(db)
+	comisionService := services.NewComisionService(db)
 
 	// Setup de rutas
 	routes.SetupAuthRoutes(router, authService)
@@ -97,6 +100,7 @@ func main() {
 	routes.SetupAdminsRoutes(router, adminService)
 	routes.SetupAlumnosRoutes(router, alumnoService)
 	routes.SetupMateriasRoutes(router, materiaService)
+	routes.SetupComisionRoutes(router, comisionService)
 
 	// Run
 	router.Run()
