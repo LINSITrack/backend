@@ -17,6 +17,7 @@ func SetupComisionRoutes(router *gin.Engine, service *services.ComisionService) 
 	{
 		adminOnlyComisiones.GET("/", comisionController.GetAllComisiones)
 		adminOnlyComisiones.GET("/:id", comisionController.GetComisionByID)
+		adminOnlyComisiones.GET("/materia/:materiaId", comisionController.GetComisionesByMateriaID)
 		adminOnlyComisiones.POST("/", comisionController.CreateComision)
 		adminOnlyComisiones.PATCH("/:id", comisionController.UpdateComision)
 		adminOnlyComisiones.DELETE("/:id", comisionController.DeleteComision)

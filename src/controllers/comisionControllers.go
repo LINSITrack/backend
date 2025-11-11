@@ -41,6 +41,22 @@ func (c *ComisionController) GetComisionByID(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, comision)
 }
 
+func (c *ComisionController) GetComisionesByMateriaID(ctx *gin.Context) {
+	materiaID, err := strconv.Atoi(ctx.Param("materiaId"))
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid materia ID"})
+		return
+	}
+
+	comisiones, err := c.comisionService.GetComisionesByMateriaID(materiaID)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, comisiones)
+}
+
 func (c *ComisionController) CreateComision(ctx *gin.Context) {
 	var comision models.Comision
 	if err := ctx.ShouldBindJSON(&comision); err != nil {

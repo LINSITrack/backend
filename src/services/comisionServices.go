@@ -31,6 +31,15 @@ func (s *ComisionService) GetComisionByID(id int) (*models.Comision, error) {
 	return &comision, nil
 }
 
+func (s *ComisionService) GetComisionesByMateriaID(materiaID int) ([]models.Comision, error) {
+    var comisiones []models.Comision
+    result := s.db.Preload("Materia").Where("materia_id = ?", materiaID).Find(&comisiones)
+    if result.Error != nil {
+        return nil, result.Error
+    }
+    return comisiones, nil
+}
+
 func (s *ComisionService) CreateComision(comision *models.Comision) error {
 	result := s.db.Create(comision)
 	return result.Error
