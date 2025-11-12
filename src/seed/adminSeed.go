@@ -9,35 +9,56 @@ import (
 )
 
 func AdminSeed(db *gorm.DB) {
+	admins := []struct {
+		Nombre   string
+		Apellido string
+		Email    string
+		Password string
+	}{
+		{
+			Nombre:   "Admin",
+			Apellido: "Admin",
+			Email:    "admin@linsi.com",
+			Password: "admin",
+		},
+		{
+			Nombre:   "Mateo",
+			Apellido: "Polci",
+			Email:    "mateo@linsi.com",
+			Password: "mateo",
+		},
+	}
 
-	// Seed de Admin
-	var existingAdmin models.Admin
-	result := db.Where("email = ?", "mateo@linsi.com").First(&existingAdmin)
-	if result.Error == nil {
-		log.Println("Admin 'mateo@linsi.com' already exists")
-	} else {
-		hashedPassword, err := bcrypt.GenerateFromPassword([]byte("mateo"), bcrypt.DefaultCost)
-		if err != nil {
-			log.Printf("Failed to hash password for admin: %v\n", err)
-			return
-		}
+	for _, adminData := range admins {
+		var existingAdmin models.Admin
+		result := db.Where("email = ?", adminData.Email).First(&existingAdmin)
 
-		newAdmin := models.Admin{
-			BaseUser: models.BaseUser{
-				Nombre:   "Mateo",
-				Apellido: "Polci",
-				Email:    "mateo@linsi.com",
-				Password: string(hashedPassword),
-			},
-		}
-
-		if err := db.Create(&newAdmin).Error; err != nil {
-			log.Printf("Failed to create admin: %v\n", err)
+		if result.Error == nil {
+			log.Printf("Admin '%s' already exists", adminData.Email)
 		} else {
-			log.Println("Admin 'admin@linsi.com' created successfully")
+			hashedPassword, err := bcrypt.GenerateFromPassword([]byte(adminData.Password), bcrypt.DefaultCost)
+			if err != nil {
+				log.Printf("Failed to hash password for admin '%s': %v", adminData.Email, err)
+				continue
+			}
+
+			newAdmin := models.Admin{
+				BaseUser: models.BaseUser{
+					Nombre:   adminData.Nombre,
+					Apellido: adminData.Apellido,
+					Email:    adminData.Email,
+					Password: string(hashedPassword),
+				},
+			}
+
+			if err := db.Create(&newAdmin).Error; err != nil {
+				log.Printf("Failed to create admin '%s': %v", adminData.Email, err)
+			} else {
+				log.Printf("Admin '%s' created successfully", adminData.Email)
+			}
 		}
 	}
 
-    // Log
+	// Log
 	log.Println("Admin seed completed successfully")
 }
