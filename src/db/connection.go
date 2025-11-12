@@ -3,6 +3,7 @@ package db
 import (
 	"log"
 	"os"
+	"time"
 
 	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
@@ -14,6 +15,8 @@ func Connect() (*gorm.DB, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	time.Local = time.UTC
 
 	dsn := os.Getenv("DB_DSN")
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
