@@ -75,6 +75,8 @@ func main() {
 		&models.Cursada{}, 
 		&models.Notificacion{}, 
 		&models.ProfesorXComision{},
+		&models.TpModel{},
+		&models.Competencia{},
 	)
 
 	// Automigraciones
@@ -87,7 +89,9 @@ func main() {
 		&models.Cursada{},
 		&models.Notificacion{},
 		&models.ProfesorXComision{},
-	); err != nil {
+		&models.TpModel{},
+		&models.Competencia{},
+		); err != nil {
 		log.Fatalf("Error during auto migration: %v\n", err)
 	}
 
@@ -100,6 +104,8 @@ func main() {
 	seed.CursadaSeed(db)
 	seed.NotificacionSeed(db)
 	seed.ProfesorXComisionSeed(db)
+	seed.TpSeed(db)
+	seed.CompetenciaSeed(db)
 
 	// Setup de services
 	authService := services.NewAuthService(db)
@@ -110,7 +116,9 @@ func main() {
 	comisionService := services.NewComisionService(db)
 	cursadaService := services.NewCursadaService(db)
 	notificacionService := services.NewNotificacionService(db)
-	profesorXComisionService := services.NewProfesorXComisionService(db) // Nuevo service
+	profesorXComisionService := services.NewProfesorXComisionService(db)
+	tpService := services.NewTpService(db)
+	competenciaService := services.NewCompetenciaService(db)
 
 	// Setup de rutas
 	routes.SetupAuthRoutes(router, authService)
@@ -121,7 +129,9 @@ func main() {
 	routes.SetupComisionRoutes(router, comisionService)
 	routes.SetupCursadasRoutes(router, cursadaService)
 	routes.SetupNotificacionRoutes(router, notificacionService)
-	routes.SetupProfesorXComisionRoutes(router, profesorXComisionService) // Nuevas rutas
+	routes.SetupProfesorXComisionRoutes(router, profesorXComisionService)
+	routes.SetupTpRoutes(router, tpService)
+	routes.SetupCompetenciaRoutes(router, competenciaService)
 
 	// Run
 	router.Run()
