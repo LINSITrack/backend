@@ -208,3 +208,48 @@ func (c *CursadaController) DeleteCursada(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusOK, gin.H{"message": "cursada eliminada exitosamente"})
 }
+
+func (c *CursadaController) GetCursadasByProfesor(ctx *gin.Context) {
+	// Obtener el ID del profesor desde el token JWT
+	userID, exists := ctx.Get("userID")
+	if !exists {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "ID de usuario no encontrado"})
+		return
+	}
+
+	profesorID := int(userID.(float64))
+
+	cursadas, err := c.cursadaService.GetCursadasByProfesorID(profesorID)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, cursadas)
+}
+
+func (c *CursadaController) GetCursadasByProfesorAndComision(ctx *gin.Context) {
+	// Obtener el ID del profesor desde el token JWT
+	userID, exists := ctx.Get("userID")
+	if !exists {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "ID de usuario no encontrado"})
+		return
+	}
+
+	profesorID := int(userID.(float64))
+
+	// Obtener el ID de la comisión desde los parámetros de la URL
+	comisionID, err := strconv.Atoi(ctx.Param("comisionId"))
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "ID de comisión inválido"})
+		return
+	}
+
+	cursadas, err := c.cursadaService.GetCursadasByProfesorAndComision(profesorID, comisionID)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, cursadas)
+}

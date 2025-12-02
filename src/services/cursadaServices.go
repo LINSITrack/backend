@@ -158,3 +158,93 @@ func (s *CursadaService) DeleteCursada(id int) error {
 	result := s.db.Delete(&models.Cursada{}, id)
 	return result.Error
 }
+
+func (s *CursadaService) GetCursadasByProfesorID(profesorID int) ([]models.CursadaResponse, error) {
+	var cursadas []models.Cursada
+
+	// Query para obtener todas las cursadas de las comisiones donde el profesor está asignado
+	result := s.db.Preload("Alumno").
+		Preload("Comision").
+		Preload("Comision.Materia").
+		Joins("JOIN comisions ON cursadas.comision_id = comisions.id").
+		Joins("JOIN profesor_x_comisions ON comisions.id = profesor_x_comisions.comision_id").
+		Where("profesor_x_comisions.profesor_id = ?", profesorID).
+		Find(&cursadas)
+
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	responses := make([]models.CursadaResponse, 0, len(cursadas))
+	for _, cursada := range cursadas {
+		response := models.CursadaResponse{
+			ID:             cursada.ID,
+			AnoLectivo:     cursada.AnoLectivo,
+			NotaFinal:      cursada.NotaFinal,
+			NotaConceptual: cursada.NotaConceptual,
+			Feedback:       cursada.Feedback,
+			AlumnoID:       cursada.AlumnoID,
+			Alumno: models.AlumnoResponse{
+				ID:       cursada.Alumno.ID,
+				Nombre:   cursada.Alumno.Nombre,
+				Apellido: cursada.Alumno.Apellido,
+				Legajo:   cursada.Alumno.Legajo,
+				Email:    cursada.Alumno.Email,
+			},
+			ComisionID: cursada.ComisionID,
+			Comision:   cursada.Comision,
+		}
+		responses = append(responses, response)
+	}
+
+	return responses, nil
+}
+
+func (s *CursadaService) GetCursadasByProfesorAndComision(profesorID, comisionID int) ([]models.CursadaResponse, error) {
+	var cursadas []models.Cursada
+
+	// Primero verificar que el profesor pertenece a esa comisión
+	var profesorXComision models.ProfesorXComision
+	checkResult := s.db.Where("profesor_id = ? AND comision_id = ?", profesorID, comisionID).First(&profesorXComision)
+	if checkResult.Error != nil {
+		if checkResult.Error == gorm.ErrRecordNotFound {
+			return nil, errors.New("el profesor no está asignado a esta comisión")
+		}
+		return nil, checkResult.Error
+	}
+
+	// Obtener las cursadas de esa comisión específica
+	result := s.db.Preload("Alumno").
+		Preload("Comision").
+		Preload("Comision.Materia").
+		Where("comision_id = ?", comisionID).
+		Find(&cursadas)
+
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	responses := make([]models.CursadaResponse, 0, len(cursadas))
+	for _, cursada := range cursadas {
+		response := models.CursadaResponse{
+			ID:             cursada.ID,
+			AnoLectivo:     cursada.AnoLectivo,
+			NotaFinal:      cursada.NotaFinal,
+			NotaConceptual: cursada.NotaConceptual,
+			Feedback:       cursada.Feedback,
+			AlumnoID:       cursada.AlumnoID,
+			Alumno: models.AlumnoResponse{
+				ID:       cursada.Alumno.ID,
+				Nombre:   cursada.Alumno.Nombre,
+				Apellido: cursada.Alumno.Apellido,
+				Legajo:   cursada.Alumno.Legajo,
+				Email:    cursada.Alumno.Email,
+			},
+			ComisionID: cursada.ComisionID,
+			Comision:   cursada.Comision,
+		}
+		responses = append(responses, response)
+	}
+
+	return responses, nil
+}

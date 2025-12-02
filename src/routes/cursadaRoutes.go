@@ -37,4 +37,14 @@ func SetupCursadasRoutes(router *gin.Engine, service *services.CursadaService) {
 	{
 		adminOnlyCursadas.DELETE("/:id", cursadaController.DeleteCursada)
 	}
+
+	// Rutas exclusivas para Profesor
+	profesorCursadas := router.Group("/cursadas")
+	profesorCursadas.Use(middleware.AuthMiddleware())
+	profesorCursadas.Use(middleware.RequireRole(models.RoleProfesor))
+	{
+		profesorCursadas.GET("/mis-comisiones", cursadaController.GetCursadasByProfesor)
+		profesorCursadas.GET("/comision/:comisionId", cursadaController.GetCursadasByProfesorAndComision)
+	}
+
 }
