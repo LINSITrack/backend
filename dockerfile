@@ -1,19 +1,22 @@
-FROM golang:1.25-alpine
+FROM golang:1.25.1-alpine3.22
 
 WORKDIR /app
 
-# Instalar Air para hot reload (versión compatible)
+# Installs Air
 RUN go install github.com/air-verse/air@latest
 
-# Copiar go.mod y go.sum primero (para cache de dependencias)
+# Copy dependencies first (cache)
 COPY go.mod go.sum ./
 RUN go mod download
 
-# Copiar el resto del código
+# Copy Air configuration
+COPY .air.toml ./
+
+# Copy the rest of the code
 COPY . .
 
-# Exponer puerto
+# Expose port
 EXPOSE 8080
 
-# Usar Air para desarrollo con hot reload
-CMD ["air"]
+# Start with Air
+CMD ["air", "-c", ".air.toml"]

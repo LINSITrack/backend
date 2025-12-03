@@ -53,6 +53,7 @@ func main() {
 	log.SetFlags(log.LstdFlags)
 	log.Printf("-----------------------------------------------: %s\n", Reset)
 	log.Printf("SERVER RUNNING ON: %s %s\n", "http://localhost:8080", Reset)
+	log.Printf("PGADMIN WEB RUNNING ON: %s %s\n", "http://localhost:5050", Reset)
 	log.Printf("-----------------------------------------------: %s\n", Reset)
 
 	// Ruta unprotected
@@ -66,18 +67,20 @@ func main() {
 	})
 
 	// (¡Peligro: Borra la base de datos al descomentar! Excepto las instancias creadas con la seed al iniciar el servidor)
-	db.Migrator().DropTable(
-		&models.Profesor{}, 
-		&models.Admin{}, 
-		&models.Alumno{}, 
-		&models.Materia{}, 
-		&models.Comision{}, 
-		&models.Cursada{}, 
-		&models.Notificacion{}, 
+/* 	db.Migrator().DropTable(
+		&models.Profesor{},
+		&models.Admin{},
+		&models.Alumno{},
+		&models.Materia{},
+		&models.Comision{},
+		&models.Cursada{},
+		&models.Notificacion{},
 		&models.ProfesorXComision{},
 		&models.TpModel{},
 		&models.Competencia{},
-	)
+		&models.Entrega{},
+		&models.Archivo{},
+	) */
 
 	// Automigraciones
 	if err := db.AutoMigrate(
@@ -91,7 +94,9 @@ func main() {
 		&models.ProfesorXComision{},
 		&models.TpModel{},
 		&models.Competencia{},
-		); err != nil {
+		&models.Entrega{},
+		&models.Archivo{},
+	); err != nil {
 		log.Fatalf("Error during auto migration: %v\n", err)
 	}
 
@@ -106,6 +111,7 @@ func main() {
 	seed.ProfesorXComisionSeed(db)
 	seed.TpSeed(db)
 	seed.CompetenciaSeed(db)
+	seed.EntregaSeed(db)
 
 	// Setup de services
 	authService := services.NewAuthService(db)
@@ -119,6 +125,7 @@ func main() {
 	profesorXComisionService := services.NewProfesorXComisionService(db)
 	tpService := services.NewTpService(db)
 	competenciaService := services.NewCompetenciaService(db)
+	entregaService := services.NewEntregaService(db)
 
 	// Setup de rutas
 	routes.SetupAuthRoutes(router, authService)
@@ -132,8 +139,8 @@ func main() {
 	routes.SetupProfesorXComisionRoutes(router, profesorXComisionService)
 	routes.SetupTpRoutes(router, tpService)
 	routes.SetupCompetenciaRoutes(router, competenciaService)
+	routes.SetupEntregaRoutes(router, entregaService)
 
 	// Run
 	router.Run()
-
 }

@@ -2,16 +2,16 @@ services:
     app:
         build:
             context: .
-            dockerfile: Dockerfile
+            dockerfile: dockerfile
         ports:
             - "8080:8080"
         volumes:
             - ./:/app
-            - /app/tmp
         environment:
             - DB_DSN=host=db user=linsiuser password=linsipass dbname=linsitrack port=5432 sslmode=disable TimeZone=America/Argentina/Buenos_Aires
             - SECRET_KEY=HEUqp6lLp9Zc/1voBOAgHYjUXPrqpYK8y0vvoEzY5pY=
             - PORT=8080
+            - CGO_ENABLED=0
         depends_on:
             db:
                 condition: service_healthy
