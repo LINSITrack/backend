@@ -96,6 +96,7 @@ func main() {
 		&models.Competencia{},
 		&models.Entrega{},
 		&models.Archivo{},
+		&models.EvaluacionModel{},
 	); err != nil {
 		log.Fatalf("Error during auto migration: %v\n", err)
 	}
@@ -112,6 +113,7 @@ func main() {
 	seed.TpSeed(db)
 	seed.CompetenciaSeed(db)
 	seed.EntregaSeed(db)
+	seed.EvaluacionSeed(db)
 
 	// Setup de services
 	authService := services.NewAuthService(db)
@@ -126,6 +128,7 @@ func main() {
 	tpService := services.NewTpService(db)
 	competenciaService := services.NewCompetenciaService(db)
 	entregaService := services.NewEntregaService(db)
+	evaluacionService := services.NewEvaluacionService(db)
 
 	// Setup de rutas
 	routes.SetupAuthRoutes(router, authService)
@@ -140,6 +143,7 @@ func main() {
 	routes.SetupTpRoutes(router, tpService)
 	routes.SetupCompetenciaRoutes(router, competenciaService)
 	routes.SetupEntregaRoutes(router, entregaService)
+	routes.SetupEvaluacionRoutes(router, evaluacionService)
 
 	// Run
 	router.Run()
