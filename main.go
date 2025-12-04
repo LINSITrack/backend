@@ -67,7 +67,7 @@ func main() {
 	})
 
 	// (¡Peligro: Borra la base de datos al descomentar! Excepto las instancias creadas con la seed al iniciar el servidor)
-	/* 	db.Migrator().DropTable(
+	 	db.Migrator().DropTable(
 		&models.Profesor{},
 		&models.Admin{},
 		&models.Alumno{},
@@ -82,7 +82,8 @@ func main() {
 		&models.Archivo{},
 		&models.EvaluacionModel{},
 		&models.Anexo{},
-	) */
+		&models.AnexoArchivo{},
+	) 
 
 	// Automigraciones
 	if err := db.AutoMigrate(

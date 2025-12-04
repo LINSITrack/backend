@@ -88,7 +88,7 @@ func (s *EntregaService) DeleteEntrega(id int) error {
 	return result.Error
 }
 
-func (s *EntregaService) SaveFile(file *multipart.FileHeader, artefactID int) (*models.Archivo, error) {
+func (s *EntregaService) SaveFile(file *multipart.FileHeader, entregaID int) (*models.Archivo, error) {
 	// Crear directorio si no existe
 	uploadDir := "uploads/entregas"
 	if err := os.MkdirAll(uploadDir, 0755); err != nil {
@@ -97,7 +97,7 @@ func (s *EntregaService) SaveFile(file *multipart.FileHeader, artefactID int) (*
 
 	// Generar nombre único para el archivo
 	timestamp := time.Now().Unix()
-	filename := fmt.Sprintf("%d_%d_%s", artefactID, timestamp, file.Filename)
+	filename := fmt.Sprintf("%d_%d_%s", entregaID, timestamp, file.Filename)
 	filepath := filepath.Join(uploadDir, filename)
 
 	// Abrir archivo subido
@@ -121,7 +121,7 @@ func (s *EntregaService) SaveFile(file *multipart.FileHeader, artefactID int) (*
 
 	// Crear registro en base de datos
 	archivo := &models.Archivo{
-		ArtefactID:   artefactID,
+		EntregaID:    entregaID,
 		Filename:     filename,
 		OriginalName: file.Filename,
 		FilePath:     filepath,
@@ -167,7 +167,7 @@ func (s *EntregaService) DeleteArchivoByID(archivoID int) error {
 
 func (s *EntregaService) GetArchivosByEntregaID(entregaID int) ([]models.Archivo, error) {
 	var archivos []models.Archivo
-	result := s.db.Where("artefact_id = ?", entregaID).Find(&archivos)
+	result := s.db.Where("entrega_id = ?", entregaID).Find(&archivos)
 	if result.Error != nil {
 		return nil, result.Error
 	}
@@ -185,7 +185,7 @@ func (s *EntregaService) GetArchivoByID(archivoID int) (*models.Archivo, error) 
 
 func (s *EntregaService) GetPrimaryArchivoByEntregaID(entregaID int) (*models.Archivo, error) {
 	var archivos []models.Archivo
-	result := s.db.Where("artefact_id = ?", entregaID).Order("created_at ASC").Find(&archivos)
+	result := s.db.Where("entrega_id = ?", entregaID).Order("created_at ASC").Find(&archivos)
 	if result.Error != nil {
 		return nil, result.Error
 	}

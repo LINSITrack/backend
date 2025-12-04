@@ -135,7 +135,7 @@ func EntregaSeed(db *gorm.DB) {
 		}
 
 		archivo := models.Archivo{
-			ArtefactID:   entrega.ID,
+			EntregaID:    entrega.ID,
 			Filename:     filename,
 			OriginalName: filename,
 			FilePath:     filePath,
