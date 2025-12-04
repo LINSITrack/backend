@@ -67,7 +67,7 @@ func main() {
 	})
 
 	// (¡Peligro: Borra la base de datos al descomentar! Excepto las instancias creadas con la seed al iniciar el servidor)
-/* 	db.Migrator().DropTable(
+	/* 	db.Migrator().DropTable(
 		&models.Profesor{},
 		&models.Admin{},
 		&models.Alumno{},
@@ -80,6 +80,8 @@ func main() {
 		&models.Competencia{},
 		&models.Entrega{},
 		&models.Archivo{},
+		&models.EvaluacionModel{},
+		&models.Anexo{},
 	) */
 
 	// Automigraciones
@@ -97,11 +99,14 @@ func main() {
 		&models.Entrega{},
 		&models.Archivo{},
 		&models.EvaluacionModel{},
+		&models.Anexo{},
+		&models.AnexoArchivo{},
 	); err != nil {
 		log.Fatalf("Error during auto migration: %v\n", err)
 	}
 
 	// Ejecutar seed inicial de la DB
+	log.Println("=== Iniciando proceso de seeding ===")
 	seed.AdminSeed(db)
 	seed.ProfesorSeed(db)
 	seed.AlumnoSeed(db)
@@ -114,6 +119,8 @@ func main() {
 	seed.CompetenciaSeed(db)
 	seed.EntregaSeed(db)
 	seed.EvaluacionSeed(db)
+	seed.AnexoSeed(db)
+	log.Println("=== Seeding completado ===")
 
 	// Setup de services
 	authService := services.NewAuthService(db)
@@ -129,6 +136,7 @@ func main() {
 	competenciaService := services.NewCompetenciaService(db)
 	entregaService := services.NewEntregaService(db)
 	evaluacionService := services.NewEvaluacionService(db)
+	anexoService := services.NewAnexoService(db)
 
 	// Setup de rutas
 	routes.SetupAuthRoutes(router, authService)
@@ -144,6 +152,7 @@ func main() {
 	routes.SetupCompetenciaRoutes(router, competenciaService)
 	routes.SetupEntregaRoutes(router, entregaService)
 	routes.SetupEvaluacionRoutes(router, evaluacionService)
+	routes.SetupAnexoRoutes(router, anexoService)
 
 	// Run
 	router.Run()
