@@ -72,10 +72,6 @@ func (c *EvaluacionController) CreateEvaluacion(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "la fecha de evaluación es obligatoria"})
 		return
 	}
-	if evaluacion.FechaDevolucion == "" {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "la fecha de devolución es obligatoria"})
-		return
-	}
 	if evaluacion.Temas == "" {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "los temas de la evaluación son obligatorios"})
 		return
@@ -111,10 +107,6 @@ func (c *EvaluacionController) UpdateEvaluacion(ctx *gin.Context) {
 	// Validaciones para campos que no pueden estar vacíos si se envían
 	if updateRequest.FechaEvaluacion != nil && *updateRequest.FechaEvaluacion == "" {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "la fecha de evaluación no puede estar vacía"})
-		return
-	}
-	if updateRequest.FechaDevolucion != nil && *updateRequest.FechaDevolucion == "" {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "la fecha de devolución no puede estar vacía"})
 		return
 	}
 	if updateRequest.Temas != nil && *updateRequest.Temas == "" {

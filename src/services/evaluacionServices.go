@@ -55,9 +55,6 @@ func (s *EvaluacionService) UpdateEvaluacion(id int, updateRequest *models.Evalu
 	if updateRequest.FechaEvaluacion != nil {
 		evaluacion.FechaEvaluacion = *updateRequest.FechaEvaluacion
 	}
-	if updateRequest.FechaDevolucion != nil {
-		evaluacion.FechaDevolucion = *updateRequest.FechaDevolucion
-	}
 	if updateRequest.Temas != nil {
 		evaluacion.Temas = *updateRequest.Temas
 	}
