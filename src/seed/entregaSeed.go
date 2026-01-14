@@ -70,12 +70,14 @@ func EntregaSeed(db *gorm.DB) {
 		AlumnoIndex int
 		TpIndex     int
 		FechaHora   string
+		Nota        float64
+		Devolucion  string
 	}{
-		{0, 0, "2024-12-14 18:30:00"}, // Juan Pérez - Primer TP
-		{1, 0, "2024-12-14 19:15:00"}, // María García - Primer TP
-		{2, 1, "2024-12-15 10:20:00"}, // Carlos López - Segundo TP
-		{0, 1, "2024-12-15 14:45:00"}, // Juan Pérez - Segundo TP
-		{1, 2, "2024-12-16 16:30:00"}, // María García - Tercer TP
+		{0, 0, "2024-12-14 18:30:00", 8.5, "Excelente implementación de los algoritmos. Código limpio y bien documentado."},
+		{1, 0, "2024-12-14 19:15:00", 7.0, "Buen trabajo, pero falta optimización en algunos casos."},
+		{2, 1, "2024-12-15 10:20:00", 9.0, "Muy buena implementación del árbol binario. Todas las operaciones funcionan correctamente."},
+		{0, 1, "2024-12-15 14:45:00", 6.5, "Funciona pero tiene errores en casos edge. Revisar validaciones."},
+		{1, 2, "2024-12-16 16:30:00", 8.0, "Buena simulación de planificación de procesos. Código claro."},
 	}
 
 	// Crear entregas basadas en los archivos que realmente existen
@@ -115,9 +117,11 @@ func EntregaSeed(db *gorm.DB) {
 
 		// Crear nueva entrega
 		entrega := models.Entrega{
-			FechaHora: entregaData.FechaHora,
-			AlumnoID:  alumnoID,
-			TpID:      tpID,
+			FechaHora:  entregaData.FechaHora,
+			Nota:       entregaData.Nota,
+			Devolucion: entregaData.Devolucion,
+			AlumnoID:   alumnoID,
+			TpID:       tpID,
 		}
 
 		if err := db.Create(&entrega).Error; err != nil {

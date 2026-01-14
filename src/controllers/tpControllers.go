@@ -69,11 +69,6 @@ func (c *TpController) UpdateTp(ctx *gin.Context) {
 		return
 	}
 
-	if updateRequest.Nota != nil && (*updateRequest.Nota < 0 || *updateRequest.Nota > 10) {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "La nota debe estar entre 0 y 10"})
-		return
-	}
-
 	if updateRequest.FechaHoraEntrega != nil {
 		if updateRequest.FechaHoraEntrega.Before(time.Now().Add(-24 * time.Hour)) {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": "La fecha de entrega no puede ser en el pasado"})
@@ -83,16 +78,6 @@ func (c *TpController) UpdateTp(ctx *gin.Context) {
 
 	if updateRequest.Consigna != nil && *updateRequest.Consigna == "" {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "La consigna no puede estar vacía"})
-		return
-	}
-
-	if updateRequest.Nota != nil && *updateRequest.Nota < 0 {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "La nota no puede ser negativa"})
-		return
-	}
-
-	if updateRequest.Devolucion != nil && *updateRequest.Devolucion == "" {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "La devolución no puede estar vacía"})
 		return
 	}
 

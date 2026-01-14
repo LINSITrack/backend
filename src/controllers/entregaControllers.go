@@ -95,6 +95,16 @@ func (c *EntregaController) UpdateEntrega(ctx *gin.Context) {
 		return
 	}
 
+	if updateRequest.Nota != nil && (*updateRequest.Nota < 0 || *updateRequest.Nota > 10) {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "La nota debe estar entre 0 y 10"})
+		return
+	}
+
+	if updateRequest.Devolucion != nil && *updateRequest.Devolucion == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "La devolución no puede estar vacía"})
+		return
+	}
+
 	entrega, err := c.entregaService.UpdateEntrega(id, &updateRequest)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

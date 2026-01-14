@@ -53,6 +53,12 @@ func (s *EntregaService) UpdateEntrega(id int, updateRequest *models.EntregaUpda
 	if updateRequest.FechaHora != nil {
 		entrega.FechaHora = *updateRequest.FechaHora
 	}
+	if updateRequest.Nota != nil {
+		entrega.Nota = *updateRequest.Nota
+	}
+	if updateRequest.Devolucion != nil {
+		entrega.Devolucion = *updateRequest.Devolucion
+	}
 	if updateRequest.AlumnoID != nil {
 		entrega.AlumnoID = *updateRequest.AlumnoID
 	}

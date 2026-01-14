@@ -58,12 +58,6 @@ func (s *EvaluacionService) UpdateEvaluacion(id int, updateRequest *models.Evalu
 	if updateRequest.Temas != nil {
 		evaluacion.Temas = *updateRequest.Temas
 	}
-	if updateRequest.Nota != nil {
-		evaluacion.Nota = *updateRequest.Nota
-	}
-	if updateRequest.Devolucion != nil {
-		evaluacion.Devolucion = *updateRequest.Devolucion
-	}
 	if updateRequest.Observaciones != nil {
 		evaluacion.Observaciones = *updateRequest.Observaciones
 	}

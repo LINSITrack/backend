@@ -52,12 +52,6 @@ func (s *TpService) UpdateTp(id int, updateRequest *models.TpUpdateRequest) (*mo
 	if updateRequest.Vigente != nil {
 		tp.Vigente = *updateRequest.Vigente
 	}
-	if updateRequest.Nota != nil {
-		tp.Nota = *updateRequest.Nota
-	}
-	if updateRequest.Devolucion != nil {
-		tp.Devolucion = *updateRequest.Devolucion
-	}
 	if updateRequest.ComisionId != nil {
 		tp.ComisionId = *updateRequest.ComisionId
 	}

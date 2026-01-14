@@ -3,13 +3,15 @@ package models
 import "time"
 
 type Entrega struct {
-	ID        int       `json:"id" gorm:"primaryKey;autoIncrement"`
-	FechaHora string    `json:"fecha_hora" gorm:"column:fecha_hora;not null"`
-	AlumnoID  int       `json:"alumno_id" gorm:"column:alumno_id;type:int;not null"`
-	Alumno    Alumno    `json:"alumno" gorm:"foreignKey:AlumnoID;references:ID"`
-	TpID      int       `json:"tp_id" gorm:"column:tp_id;type:int;not null"`
-	Tp        TpModel   `json:"tp" gorm:"foreignKey:TpID;references:ID"`
-	Archivo   []Archivo `json:"archivo,omitempty" gorm:"foreignKey:EntregaID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	ID         int       `json:"id" gorm:"primaryKey;autoIncrement"`
+	FechaHora  string    `json:"fecha_hora" gorm:"column:fecha_hora;not null"`
+	Nota       float64   `json:"nota" gorm:"column:nota;type:float;null"`
+	Devolucion string    `json:"devolucion" gorm:"column:devolucion;type:text;null"`
+	AlumnoID   int       `json:"alumno_id" gorm:"column:alumno_id;type:int;not null"`
+	Alumno     Alumno    `json:"alumno" gorm:"foreignKey:AlumnoID;references:ID"`
+	TpID       int       `json:"tp_id" gorm:"column:tp_id;type:int;not null"`
+	Tp         TpModel   `json:"tp" gorm:"foreignKey:TpID;references:ID"`
+	Archivo    []Archivo `json:"archivo,omitempty" gorm:"foreignKey:EntregaID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 }
 
 type Archivo struct {
@@ -25,7 +27,9 @@ type Archivo struct {
 }
 
 type EntregaUpdateRequest struct {
-	FechaHora *string `json:"fecha_hora,omitempty"`
-	AlumnoID  *int    `json:"alumno_id,omitempty"`
-	TpID      *int    `json:"tp_id,omitempty"`
+	FechaHora  *string  `json:"fecha_hora,omitempty"`
+	Nota       *float64 `json:"nota,omitempty"`
+	Devolucion *string  `json:"devolucion,omitempty"`
+	AlumnoID   *int     `json:"alumno_id,omitempty"`
+	TpID       *int     `json:"tp_id,omitempty"`
 }
