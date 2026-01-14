@@ -16,7 +16,7 @@ func EvaluacionSeed(db *gorm.DB) {
 			Temas:           "Algoritmos de ordenamiento: burbuja, inserción, selección. Complejidad temporal y espacial.",
 			Nota:            8.5,
 			Devolucion:      "Excelente comprensión de los algoritmos básicos. Mejorar análisis de complejidad espacial.",
-			Observaciones:   "Participación activa en clase",
+			Observaciones:   "Llevar notebook",
 			ComisionId:      1,
 		},
 		{
@@ -25,7 +25,7 @@ func EvaluacionSeed(db *gorm.DB) {
 			Temas:           "Estructuras de datos: listas, pilas, colas. Implementación y casos de uso.",
 			Nota:            0, // Sin nota aún
 			Devolucion:      "",
-			Observaciones:   "Evaluación pendiente de corrección",
+			Observaciones:   "Llevar notebook",
 			ComisionId:      1,
 		},
 
@@ -47,7 +47,7 @@ func EvaluacionSeed(db *gorm.DB) {
 			Temas:           "Procesos y threads: creación, sincronización, comunicación entre procesos.",
 			Nota:            9.2,
 			Devolucion:      "Excelente dominio conceptual y práctico. Muy buena resolución de ejercicios.",
-			Observaciones:   "Alumno destacado",
+			Observaciones:   "Llevar notebook",
 			ComisionId:      3,
 		},
 		{
@@ -56,7 +56,7 @@ func EvaluacionSeed(db *gorm.DB) {
 			Temas:           "Gestión de memoria: paginación, segmentación, memoria virtual.",
 			Nota:            0, // Sin calificar
 			Devolucion:      "",
-			Observaciones:   "Evaluación en proceso de corrección",
+			Observaciones:   "Llevar notebook",
 			ComisionId:      3,
 		},
 
@@ -67,7 +67,7 @@ func EvaluacionSeed(db *gorm.DB) {
 			Temas:           "Modelo relacional: normalización, dependencias funcionales, formas normales.",
 			Nota:            6.8,
 			Devolucion:      "Comprende los conceptos básicos pero necesita reforzar normalización de 3FN.",
-			Observaciones:   "Recomendable práctica adicional",
+			Observaciones:   "Llevar calculadora",
 			ComisionId:      4,
 		},
 		{
@@ -76,7 +76,7 @@ func EvaluacionSeed(db *gorm.DB) {
 			Temas:           "SQL avanzado: subconsultas, joins, funciones agregadas, vistas.",
 			Nota:            8.8,
 			Devolucion:      "Muy buen manejo de SQL. Consultas complejas resueltas correctamente.",
-			Observaciones:   "",
+			Observaciones:   "Llevar calculadora",
 			ComisionId:      4,
 		},
 
@@ -98,7 +98,7 @@ func EvaluacionSeed(db *gorm.DB) {
 			Temas:           "Paradigmas de programación: POO, encapsulamiento, herencia, polimorfismo.",
 			Nota:            0, // Pendiente
 			Devolucion:      "",
-			Observaciones:   "Entrega fuera de término, evaluación pendiente",
+			Observaciones:   "Llevar notebook",
 			ComisionId:      6,
 		},
 		{
@@ -107,7 +107,7 @@ func EvaluacionSeed(db *gorm.DB) {
 			Temas:           "Patrones de diseño: Singleton, Factory, Observer, MVC.",
 			Nota:            9.0,
 			Devolucion:      "Excelente aplicación de patrones. Código limpio y bien documentado.",
-			Observaciones:   "Proyecto destacado",
+			Observaciones:   "Llevar calculadora",
 			ComisionId:      6,
 		},
 
@@ -140,7 +140,7 @@ func EvaluacionSeed(db *gorm.DB) {
 			Temas:           "Análisis exploratorio de datos: estadística descriptiva, visualizaciones, outliers.",
 			Nota:            0, // Sin nota
 			Devolucion:      "",
-			Observaciones:   "Dataset corrupto, reevaluación programada",
+			Observaciones:   "Llevar notebook",
 			ComisionId:      9,
 		},
 		{
@@ -149,7 +149,7 @@ func EvaluacionSeed(db *gorm.DB) {
 			Temas:           "Machine Learning: regresión lineal, validación cruzada, métricas de evaluación.",
 			Nota:            8.7,
 			Devolucion:      "Excelente implementación de modelos. Interpretación correcta de métricas.",
-			Observaciones:   "Muy buen análisis de resultados",
+			Observaciones:   "Llevar notebook",
 			ComisionId:      9,
 		},
 
@@ -171,7 +171,7 @@ func EvaluacionSeed(db *gorm.DB) {
 			Temas:           "Presentación de propuesta de proyecto: objetivos, alcance, tecnologías.",
 			Nota:            0, // Evaluación en curso
 			Devolucion:      "",
-			Observaciones:   "Propuesta ambiciosa, revisar alcance y factibilidad",
+			Observaciones:   "",
 			ComisionId:      11,
 		},
 	}
