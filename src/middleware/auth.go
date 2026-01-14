@@ -26,7 +26,7 @@ func AuthMiddleware() gin.HandlerFunc {
 		// Obtener el token de la cookie
 		tokenString, err := ctx.Cookie("jwt")
 		if err != nil {
-			ctx.JSON(http.StatusUnauthorized, gin.H{"error": "No se encontró la cookie de autenticación"})
+			ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Usuario no autenticado"})
 			ctx.Abort()
 			return
 		}

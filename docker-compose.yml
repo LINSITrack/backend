@@ -27,7 +27,7 @@ services:
             POSTGRES_PASSWORD: linsipass
             POSTGRES_DB: linsitrack
         ports:
-            - "5432:5432"
+            - "5433:5432"
         volumes:
             - db_data:/var/lib/postgresql/data
         healthcheck:
@@ -47,7 +47,7 @@ services:
             PGADMIN_DEFAULT_PASSWORD: admin123
             PGADMIN_CONFIG_SERVER_MODE: "False"
         ports:
-            - "5050:80"
+            - "5051:80"
         depends_on:
             - db
         volumes:

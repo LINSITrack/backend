@@ -1,6 +1,8 @@
 # LINSITrack
 
-## Running the stack locally
+## Correr el stack localmente
+
+Teniendo Docker corriendo ( y abierto en windows), correr el siguiente comando en la raiz del proyecto: 
 
 ```bash
 docker-compose up -d
