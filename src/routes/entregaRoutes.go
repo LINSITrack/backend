@@ -43,5 +43,9 @@ func SetupEntregaRoutes(router *gin.Engine, service *services.EntregaService) {
 		alumnoEntregas.GET("/:id", entregaController.GetEntregaByIDForAlumno)
 		alumnoEntregas.GET("/:id/archivos", entregaController.GetArchivosByEntregaIDForAlumno)
 		alumnoEntregas.GET("/:id/archivo/download", entregaController.DownloadArchivoForAlumno)
+
+		// Permitir que alumnos creen sus propias entregas y suban archivos
+		alumnoEntregas.POST("/", entregaController.CreateEntregaForAlumno)
+		alumnoEntregas.POST("/:id/upload", entregaController.UploadArchivoForAlumno)
 	}
 }

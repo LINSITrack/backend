@@ -13,11 +13,15 @@ import (
 )
 
 type EntregaService struct {
-	db *gorm.DB
+	db                  *gorm.DB
+	notificacionService *NotificacionService
 }
 
 func NewEntregaService(db *gorm.DB) *EntregaService {
-	return &EntregaService{db: db}
+	return &EntregaService{
+		db:                  db,
+		notificacionService: NewNotificacionService(db),
+	}
 }
 
 func (s *EntregaService) GetAllEntregas() ([]models.Entrega, error) {
@@ -40,7 +44,19 @@ func (s *EntregaService) GetEntregaByID(id int) (*models.Entrega, error) {
 
 func (s *EntregaService) CreateEntrega(entrega *models.Entrega) error {
 	result := s.db.Create(entrega)
-	return result.Error
+	if result.Error != nil {
+		return result.Error
+	}
+
+	// Get TP and comision details for notification
+	var tp models.TpModel
+	if err := s.db.Preload("Comision").Preload("Comision.Materia").First(&tp, entrega.TpID).Error; err == nil {
+		mensaje := fmt.Sprintf("Tu entrega para el trabajo práctico de %s (Comisión: %s) ha sido registrada correctamente",
+			tp.Comision.Materia.Nombre, tp.Comision.Nombre)
+		s.notificacionService.NotifyAlumno(entrega.AlumnoID, mensaje)
+	}
+
+	return nil
 }
 
 func (s *EntregaService) UpdateEntrega(id int, updateRequest *models.EntregaUpdateRequest) (*models.Entrega, error) {
@@ -50,13 +66,22 @@ func (s *EntregaService) UpdateEntrega(id int, updateRequest *models.EntregaUpda
 		return nil, result.Error
 	}
 
+	notaChanged := false
+	devolucionChanged := false
+
 	if updateRequest.FechaHora != nil {
 		entrega.FechaHora = *updateRequest.FechaHora
 	}
 	if updateRequest.Nota != nil {
+		if entrega.Nota != *updateRequest.Nota {
+			notaChanged = true
+		}
 		entrega.Nota = *updateRequest.Nota
 	}
 	if updateRequest.Devolucion != nil {
+		if entrega.Devolucion != *updateRequest.Devolucion {
+			devolucionChanged = true
+		}
 		entrega.Devolucion = *updateRequest.Devolucion
 	}
 	if updateRequest.AlumnoID != nil {
@@ -70,6 +95,23 @@ func (s *EntregaService) UpdateEntrega(id int, updateRequest *models.EntregaUpda
 	if result.Error != nil {
 		return nil, result.Error
 	}
+
+	// Notify student if nota or devolucion changed
+	if notaChanged || devolucionChanged {
+		var tp models.TpModel
+		if err := s.db.Preload("Comision").Preload("Comision.Materia").First(&tp, entrega.TpID).Error; err == nil {
+			if notaChanged {
+				mensaje := fmt.Sprintf("Tu entrega de TP para %s (Comisión: %s) ha sido calificada - Nota: %.2f",
+					tp.Comision.Materia.Nombre, tp.Comision.Nombre, entrega.Nota)
+				s.notificacionService.NotifyAlumno(entrega.AlumnoID, mensaje)
+			} else if devolucionChanged {
+				mensaje := fmt.Sprintf("Nueva devolución disponible para tu entrega de TP de %s (Comisión: %s)",
+					tp.Comision.Materia.Nombre, tp.Comision.Nombre)
+				s.notificacionService.NotifyAlumno(entrega.AlumnoID, mensaje)
+			}
+		}
+	}
+
 	return &entrega, nil
 }
 
@@ -221,4 +263,45 @@ func (s *EntregaService) GetEntregaByIDAndAlumnoID(entregaID, alumnoID int) (*mo
 		return nil, result.Error
 	}
 	return &entrega, nil
+}
+
+// ValidateTpForAlumno valida que el TP pertenezca a una comisión en la que el alumno está inscrito
+func (s *EntregaService) ValidateTpForAlumno(alumnoID, tpID int) error {
+	var count int64
+	result := s.db.Table("tp_models").
+		Joins("JOIN cursadas ON tp_models.comision_id = cursadas.comision_id").
+		Where("cursadas.alumno_id = ? AND tp_models.id = ? AND tp_models.vigente = ?", alumnoID, tpID, true).
+		Count(&count)
+
+	if result.Error != nil {
+		return result.Error
+	}
+
+	if count == 0 {
+		return fmt.Errorf("el TP no pertenece a ninguna de tus comisiones")
+	}
+
+	return nil
+}
+
+// GetEntregaByAlumnoAndTpID obtiene una entrega específica de un alumno para un TP
+func (s *EntregaService) GetEntregaByAlumnoAndTpID(alumnoID, tpID int) (*models.Entrega, error) {
+	var entrega models.Entrega
+	result := s.db.Preload("Archivo").Preload("Alumno").Preload("Tp").
+		Where("alumno_id = ? AND tp_id = ?", alumnoID, tpID).
+		First(&entrega)
+
+	if result.Error != nil {
+		if result.Error == gorm.ErrRecordNotFound {
+			return nil, nil
+		}
+		return nil, result.Error
+	}
+
+	return &entrega, nil
+}
+
+// SaveArchivo guarda un archivo asociado a una entrega
+func (s *EntregaService) SaveArchivo(entregaID int, file *multipart.FileHeader) (*models.Archivo, error) {
+	return s.SaveFile(file, entregaID)
 }

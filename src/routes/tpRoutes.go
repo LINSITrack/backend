@@ -14,6 +14,10 @@ func SetupTpRoutes(router *gin.Engine, service *services.TpService) {
 	tps := router.Group("/tps")
 	tps.Use(middleware.AuthMiddleware())
 	{
+		// Endpoint para alumnos: obtener sus propios TPs
+		tps.GET("/mis-tps", middleware.RequireRole(models.RoleAlumno), tpController.GetMyTps)
+
+		// Endpoints admin/profesor
 		tps.GET("/", middleware.RequireRole(models.RoleAdmin, models.RoleProfesor), tpController.GetAllTps)
 		tps.GET("/:id", middleware.RequireRole(models.RoleAdmin, models.RoleProfesor), tpController.GetTpByID)
 
@@ -22,6 +26,4 @@ func SetupTpRoutes(router *gin.Engine, service *services.TpService) {
 
 		tps.DELETE("/:id", middleware.RequireRole(models.RoleAdmin), tpController.DeleteTp)
 	}
-	// TO-DO: COMPLETAR ENDPOINTS CON REQUERIMIENTOS DEL FRONTEND
-	// TO-DO: REVISAR A MISMO FIN LOS ROLES NECESARIOS PARA C/1
 }

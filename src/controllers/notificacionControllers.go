@@ -180,3 +180,219 @@ func (c *NotificacionController) DeleteNotificacion(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusOK, gin.H{"message": "Notificación eliminada correctamente"})
 }
+
+func (c *NotificacionController) NotifyAlumnosByMateria(ctx *gin.Context) {
+	var request models.NotifyByMateriaRequest
+	if err := ctx.ShouldBindJSON(&request); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error":   "Datos inválidos",
+			"details": err.Error(),
+		})
+		return
+	}
+
+	if request.Mensaje == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "El mensaje es obligatorio"})
+		return
+	}
+	if request.MateriaID == 0 {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "El ID de materia es obligatorio"})
+		return
+	}
+
+	count, err := c.notificacionService.NotifyAlumnosByMateria(request.MateriaID, request.Mensaje)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusCreated, gin.H{
+		"message":             "Notificaciones enviadas correctamente",
+		"alumnos_notificados": count,
+	})
+}
+
+func (c *NotificacionController) NotifyAlumnosByComision(ctx *gin.Context) {
+	var request models.NotifyByComisionRequest
+	if err := ctx.ShouldBindJSON(&request); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error":   "Datos inválidos",
+			"details": err.Error(),
+		})
+		return
+	}
+
+	if request.Mensaje == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "El mensaje es obligatorio"})
+		return
+	}
+	if request.ComisionID == 0 {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "El ID de comisión es obligatorio"})
+		return
+	}
+
+	count, err := c.notificacionService.NotifyAlumnosByComision(request.ComisionID, request.Mensaje)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusCreated, gin.H{
+		"message":             "Notificaciones enviadas correctamente",
+		"alumnos_notificados": count,
+	})
+}
+
+// GetMyNotificaciones returns all notifications for the authenticated student
+func (c *NotificacionController) GetMyNotificaciones(ctx *gin.Context) {
+	userIDInterface, exists := ctx.Get("userID")
+	if !exists {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Usuario no autenticado"})
+		return
+	}
+
+	// El JWT devuelve el ID como float64
+	var userID int
+	switch v := userIDInterface.(type) {
+	case float64:
+		userID = int(v)
+	case int:
+		userID = v
+	default:
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "ID de usuario inválido"})
+		return
+	}
+
+	notificaciones, err := c.notificacionService.GetNotificacionesByAlumnoID(userID)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, notificaciones)
+}
+
+// GetMyUnreadNotificaciones returns unread notifications for the authenticated student
+func (c *NotificacionController) GetMyUnreadNotificaciones(ctx *gin.Context) {
+	userIDInterface, exists := ctx.Get("userID")
+	if !exists {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Usuario no autenticado"})
+		return
+	}
+
+	var userID int
+	switch v := userIDInterface.(type) {
+	case float64:
+		userID = int(v)
+	case int:
+		userID = v
+	default:
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "ID de usuario inválido"})
+		return
+	}
+
+	notificaciones, err := c.notificacionService.GetUnreadNotificacionesByAlumnoID(userID)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, notificaciones)
+}
+
+// GetMyReadNotificaciones returns read notifications for the authenticated student
+func (c *NotificacionController) GetMyReadNotificaciones(ctx *gin.Context) {
+	userIDInterface, exists := ctx.Get("userID")
+	if !exists {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Usuario no autenticado"})
+		return
+	}
+
+	var userID int
+	switch v := userIDInterface.(type) {
+	case float64:
+		userID = int(v)
+	case int:
+		userID = v
+	default:
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "ID de usuario inválido"})
+		return
+	}
+
+	notificaciones, err := c.notificacionService.GetReadNotificacionesByAlumnoID(userID)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, notificaciones)
+}
+
+// MarkMyNotificacionAsRead marks a notification as read for the authenticated student
+func (c *NotificacionController) MarkMyNotificacionAsRead(ctx *gin.Context) {
+	userIDInterface, exists := ctx.Get("userID")
+	if !exists {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Usuario no autenticado"})
+		return
+	}
+
+	var userID int
+	switch v := userIDInterface.(type) {
+	case float64:
+		userID = int(v)
+	case int:
+		userID = v
+	default:
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "ID de usuario inválido"})
+		return
+	}
+
+	id, err := strconv.Atoi(ctx.Param("id"))
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+		return
+	}
+
+	// Verify that the notification belongs to the user
+	notif, err := c.notificacionService.GetNotificacionByID(id)
+	if err != nil {
+		ctx.JSON(http.StatusNotFound, gin.H{"error": "Notificación no encontrada"})
+		return
+	}
+	if notif.AlumnoID != userID {
+		ctx.JSON(http.StatusForbidden, gin.H{"error": "No tienes permiso para modificar esta notificación"})
+		return
+	}
+
+	if err := c.notificacionService.MarkNotificacionAsRead(id); err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{"message": "Notificación marcada como leída"})
+}
+
+// MarkAllMyNotificacionAsRead marks all notifications as read for the authenticated student
+func (c *NotificacionController) MarkAllMyNotificacionAsRead(ctx *gin.Context) {
+	userIDInterface, exists := ctx.Get("userID")
+	if !exists {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Usuario no autenticado"})
+		return
+	}
+
+	var userID int
+	switch v := userIDInterface.(type) {
+	case float64:
+		userID = int(v)
+	case int:
+		userID = v
+	default:
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "ID de usuario inválido"})
+		return
+	}
+
+	if err := c.notificacionService.MarkAllNotificacionAsReadByAlumnoID(userID); err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{"message": "Todas las notificaciones marcadas como leídas"})
+}

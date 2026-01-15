@@ -150,3 +150,57 @@ func (c *ResultadoEvaluacionController) DeleteResultado(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusNoContent, nil)
 }
+
+// GetMisResultados obtiene los resultados de evaluación del alumno autenticado
+func (c *ResultadoEvaluacionController) GetMisResultados(ctx *gin.Context) {
+	// Obtener el ID del alumno desde el contexto (establecido por el middleware de autenticación)
+	userID, exists := ctx.Get("userID")
+	if !exists {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Usuario no autenticado"})
+		return
+	}
+
+	alumnoID := int(userID.(float64))
+
+	resultados, err := c.resultadoService.GetResultadosByAlumnoID(alumnoID)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, resultados)
+}
+
+// GetMiResultadoByID obtiene un resultado específico del alumno autenticado
+func (c *ResultadoEvaluacionController) GetMiResultadoByID(ctx *gin.Context) {
+	// Obtener el ID del resultado desde los parámetros
+	resultadoID, err := strconv.Atoi(ctx.Param("id"))
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+		return
+	}
+
+	// Obtener el ID del alumno desde el contexto
+	userID, exists := ctx.Get("userID")
+	if !exists {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Usuario no autenticado"})
+		return
+	}
+
+	alumnoID := int(userID.(float64))
+
+	// Obtener el resultado
+	resultado, err := c.resultadoService.GetResultadoByID(resultadoID)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Verificar que el resultado pertenece al alumno autenticado
+	if resultado.AlumnoID != alumnoID {
+		ctx.JSON(http.StatusForbidden, gin.H{"error": "No tienes permiso para ver este resultado"})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, resultado)
+}

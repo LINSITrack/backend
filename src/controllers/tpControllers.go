@@ -106,3 +106,22 @@ func (c *TpController) DeleteTp(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusNoContent, nil)
 }
+
+// GetMyTps obtiene los TPs del alumno autenticado
+func (c *TpController) GetMyTps(ctx *gin.Context) {
+	userID, exists := ctx.Get("userID")
+	if !exists {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Usuario no autenticado"})
+		return
+	}
+
+	alumnoID := int(userID.(float64))
+
+	tps, err := c.tpService.GetTpsByAlumnoID(alumnoID)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, tps)
+}

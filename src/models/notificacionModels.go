@@ -26,3 +26,13 @@ type NotificacionResponse struct {
 	AlumnoID  int            `json:"alumno_id"`
 	Alumno    AlumnoResponse `json:"alumno"`
 }
+
+type NotifyByMateriaRequest struct {
+	Mensaje   string `json:"mensaje" binding:"required"`
+	MateriaID int    `json:"materia_id" binding:"required"`
+}
+
+type NotifyByComisionRequest struct {
+	Mensaje    string `json:"mensaje" binding:"required"`
+	ComisionID int    `json:"comision_id" binding:"required"`
+}

@@ -383,3 +383,109 @@ func (c *EntregaController) DownloadArchivoForAlumno(ctx *gin.Context) {
 	ctx.Header("Content-Type", archivo.ContentType)
 	ctx.File(archivo.FilePath)
 }
+
+// CreateEntregaForAlumno - Crea una entrega para el alumno autenticado
+func (c *EntregaController) CreateEntregaForAlumno(ctx *gin.Context) {
+	// Obtener el ID del usuario logueado
+	userID, exists := ctx.Get("userID")
+	if !exists {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Usuario no autenticado"})
+		return
+	}
+
+	alumnoID := int(userID.(float64))
+
+	var entrega models.Entrega
+	if err := ctx.ShouldBindJSON(&entrega); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error":   "Datos inválidos",
+			"details": err.Error(),
+		})
+		return
+	}
+
+	// Establecer el ID del alumno autenticado
+	entrega.AlumnoID = alumnoID
+
+	// Establecer la fecha y hora actual si no se proporciona
+	if entrega.FechaHora == "" {
+		entrega.FechaHora = time.Now().Format("2006-01-02 15:04:05")
+	}
+
+	// Validar que se proporcionó el ID del TP
+	if entrega.TpID == 0 {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "el ID del TP es obligatorio"})
+		return
+	}
+
+	// Validar que el TP pertenece a una comisión en la que el alumno está inscrito
+	if err := c.entregaService.ValidateTpForAlumno(alumnoID, entrega.TpID); err != nil {
+		ctx.JSON(http.StatusForbidden, gin.H{"error": "El TP no pertenece a ninguna de tus comisiones"})
+		return
+	}
+
+	// Verificar que el alumno no haya entregado ya este TP
+	existingEntrega, _ := c.entregaService.GetEntregaByAlumnoAndTpID(alumnoID, entrega.TpID)
+	if existingEntrega != nil {
+		ctx.JSON(http.StatusConflict, gin.H{"error": "Ya has realizado una entrega para este TP"})
+		return
+	}
+
+	if err := c.entregaService.CreateEntrega(&entrega); err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusCreated, entrega)
+}
+
+// UploadArchivoForAlumno - Permite al alumno subir un archivo a su propia entrega
+func (c *EntregaController) UploadArchivoForAlumno(ctx *gin.Context) {
+	entregaID, err := strconv.Atoi(ctx.Param("id"))
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid entrega ID"})
+		return
+	}
+
+	// Obtener el ID del usuario logueado
+	userID, exists := ctx.Get("userID")
+	if !exists {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Usuario no autenticado"})
+		return
+	}
+
+	alumnoID := int(userID.(float64))
+
+	// Verificar que la entrega existe y pertenece al alumno
+	entrega, err := c.entregaService.GetEntregaByIDAndAlumnoID(entregaID, alumnoID)
+	if err != nil {
+		ctx.JSON(http.StatusNotFound, gin.H{"error": "Entrega no encontrada o no pertenece al usuario"})
+		return
+	}
+
+	// Obtener el archivo del request
+	file, err := ctx.FormFile("file")
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error":   "No se pudo obtener el archivo",
+			"details": err.Error(),
+		})
+		return
+	}
+
+	// Guardar el archivo
+	archivo, err := c.entregaService.SaveArchivo(entregaID, file)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"error":   "Error al guardar el archivo",
+			"details": err.Error(),
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusCreated, gin.H{
+		"message": "Archivo subido exitosamente",
+		"archivo": archivo,
+		"entrega": entrega,
+	})
+}
